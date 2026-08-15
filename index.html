@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#1a1a1a" />
+<title>废土余生录 · 中式末日生存模拟</title>
+
+<!-- 加载动画样式：内联，确保最早渲染 -->
+<style>
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #1a1714;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loading-spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid rgba(139, 44, 26, 0.25);
+  border-top-color: #8b2c1a;
+  animation: loading-spin 1s linear infinite;
+}
+@keyframes loading-spin {
+  to { transform: rotate(360deg); }
+}
+.loading-title {
+  margin-top: 24px;
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #d4c5b5;
+  letter-spacing: 0.18em;
+}
+.loading-subtitle {
+  margin-top: 10px;
+  font-family: 'LXGW WenKai Screen', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 0.9rem;
+  color: #8a7f72;
+  animation: loading-pulse 1.6s ease-in-out infinite;
+}
+@keyframes loading-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+</style>
+
+<!-- 字体：思源宋体（标题）+ 霞鹜文楷（正文） -->
+<link href="lib/fonts/google/google-fonts-noto-serif-sc-zcool-xiaowei.css" rel="stylesheet" />
+<link href="lib/fonts/lxgw/style.min.css" rel="stylesheet" />
+
+<!-- 图标库 -->
+<link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
+
+<!-- Tailwind CSS（Play CDN） -->
+<script src="lib/tailwind/tailwind.min.js"></script>
+
+<!-- ECharts 5（雷达图） -->
+<script src="lib/echarts/echarts.min.js"></script>
+
+<!-- 自定义样式 -->
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ============ 加载动画 ============ -->
+<div id="loading-screen">
+  <div class="loading-spinner" role="status" aria-label="加载中"></div>
+  <div class="loading-title">废土余生录</div>
+  <div class="loading-subtitle">正在集结幸存者…</div>
+</div>
+<script>
+  (function () {
+    function hideLoader() {
+      var loader = document.getElementById('loading-screen');
+      if (loader) loader.classList.add('hidden');
+    }
+    if (document.readyState === 'complete') {
+      setTimeout(hideLoader, 400);
+    } else {
+      window.addEventListener('load', function () { setTimeout(hideLoader, 400); });
+    }
+  })();
+</script>
+
+<!-- ============ SVG 纹样定义（回纹/瓦当，背景叠加用） ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="huiwen" x="0" y="0" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M8,8 L36,8 L36,16 L16,16 L16,28 L36,28 L36,36 L8,36 Z" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+    </pattern>
+    <pattern id="wannian" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M20,8 L28,16 L20,24 L12,16 Z M20,24 L28,32 L20,40 L12,32 Z M8,20 L16,12 L24,20 L16,28 Z M24,20 L32,12 L40,20 L32,28 Z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+    </pattern>
+  </defs>
+</svg>
+
+<!-- ============ 顶部状态条 ============ -->
+<header class="game-header">
+  <div class="gh-left">
+    <div class="gh-logo"><i class="fa-solid fa-radiation"></i></div>
+    <div class="gh-titles">
+      <div class="gh-title">废土余生录</div>
+      <div class="gh-sub" id="hdr-name">无名幸存者</div>
+    </div>
+  </div>
+  <div class="gh-center">
+    <div class="gh-stat"><span class="ghs-label">天数</span><span class="ghs-val" id="hdr-day">第 1 天</span></div>
+    <div class="gh-stat"><span class="ghs-label">时令</span><span class="ghs-val" id="hdr-season">秋·1</span></div>
+    <div class="gh-stat"><span class="ghs-label">时辰</span><span class="ghs-val" id="hdr-phase"><i class="fa-solid fa-sun"></i> 白昼</span></div>
+    <div class="gh-stat caps"><span class="ghs-label">瓶盖</span><span class="ghs-val" id="hdr-caps"><i class="fa-solid fa-circle-dot"></i> 0</span></div>
+  </div>
+  <div class="gh-right">
+    <div class="gh-progress-wrap" title="距停火日进度">
+      <div class="gh-progress-bar"><div class="gh-progress-fill" id="hdr-progress"></div></div>
+    </div>
+    <button class="gh-btn" id="btn-help" title="说明"><i class="fa-solid fa-circle-question"></i></button>
+    <button class="gh-btn" id="btn-export" title="导出存档"><i class="fa-solid fa-file-export"></i></button>
+    <button class="gh-btn" id="btn-import" title="导入存档"><i class="fa-solid fa-file-import"></i></button>
+    <button class="gh-btn" id="btn-menu" title="菜单"><i class="fa-solid fa-bars"></i></button>
+    <span class="save-badge" id="save-badge" title="已自动保存"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+    <input type="file" id="import-file" accept=".json,application/json" style="display:none" />
+  </div>
+</header>
+
+<!-- ============ 主区域 ============ -->
+<main class="game-main">
+  <!-- 左：导航侧边栏 -->
+  <nav class="tab-bar">
+    <button class="tab-btn tab-mobile-only" data-tab="status"><i class="fa-solid fa-user-shield"></i><span>状态</span></button>
+    <button class="tab-btn active" data-tab="shelter"><i class="fa-solid fa-house-chimney"></i><span>避难所</span></button>
+    <button class="tab-btn" data-tab="scavenge"><i class="fa-solid fa-compass"></i><span>探索</span></button>
+    <button class="tab-btn" data-tab="inventory"><i class="fa-solid fa-briefcase"></i><span>背包</span></button>
+    <button class="tab-btn tab-desktop-only" data-tab="craft"><i class="fa-solid fa-hammer"></i><span>制造</span></button>
+    <button class="tab-btn tab-desktop-only" data-tab="shop"><i class="fa-solid fa-store"></i><span>商店</span></button>
+    <button class="tab-btn tab-desktop-only" data-tab="log"><i class="fa-solid fa-scroll"></i><span>纪事</span></button>
+    <button class="tab-btn tab-mobile-only" data-tab="more"><i class="fa-solid fa-ellipsis"></i><span>更多</span></button>
+  </nav>
+
+  <!-- 中：属性面板 -->
+  <aside class="stat-panel">
+    <div class="sp-head"><i class="fa-solid fa-user-shield"></i> 幸存者状态</div>
+    <div class="stat-bars" id="stat-bars"></div>
+    <div class="radar-wrap"><div id="radar-chart" class="radar-chart"></div></div>
+  </aside>
+
+  <!-- 右：内容区 -->
+  <section class="content-panel">
+    <div class="tab-content" id="tab-content"></div>
+  </section>
+</main>
+
+<!-- ============ 底部行动条 ============ -->
+<footer class="action-bar" id="action-bar"></footer>
+
+<!-- ============ 弹窗 ============ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<!-- ============ Toast 容器 ============ -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ============ 脚本（按依赖顺序，普通 script 标签，file:// 兼容） ============ -->
+<!-- 数据层 -->
+<script src="js/data/items.js"></script>
+<script src="js/data/items_extra.js"></script>
+<script src="js/data/locations.js"></script>
+<script src="js/data/facilities.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/shop.js"></script>
+<!-- 核心引擎 -->
+<script src="js/core/state.js"></script>
+<script src="js/core/save.js"></script>
+<script src="js/core/engine.js"></script>
+<!-- UI 层 -->
+<script src="js/ui/render.js"></script>
+<script src="js/ui/main.js"></script>
+</body>
+</html>

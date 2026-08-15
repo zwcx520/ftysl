@@ -1,0 +1,2529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>废土编年史 - 后台管理</title>
+  <!-- Tailwind CSS -->
+  <script src="lib/tailwind/tailwind.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="lib/fontawesome/css/all.min.css">
+  <!-- Google Fonts: 思源宋体 -->
+  <link href="lib/fonts/google/google-fonts-noto-serif-sc.css" rel="stylesheet">
+  <!-- 霞鹜文楷 -->
+  <link href="lib/fonts/lxgw/style.css" rel="stylesheet">
+  <script>
+    // Tailwind 自定义配置
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'wasteland-dark': '#1a1714',
+            'wasteland-card': '#2a2520',
+            'wasteland-input': '#1e1a16',
+            'wasteland-hover': '#3a3329',
+            'wasteland-border': '#3d342e',
+            'wasteland-border-light': '#4a4039',
+            'wasteland-red': '#8b2c1a',
+            'wasteland-red-light': '#c43d28',
+            'wasteland-orange': '#d4843c',
+            'wasteland-orange-light': '#e89a52',
+            'wasteland-green': '#5a7c3a',
+            'wasteland-text': '#e8dcc8',
+            'wasteland-text-muted': '#a89880',
+            'wasteland-text-dim': '#6b5d4f',
+          },
+          fontFamily: {
+            'serif-cn': ['Noto Serif SC', 'serif'],
+            'body-cn': ['LXGW WenKai', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ==================== 全局样式 ==================== */
+    :root {
+      --bg-dark: #1a1714;
+      --bg-card: #2a2520;
+      --bg-input: #1e1a16;
+      --bg-hover: #3a3329;
+      --border-color: #3d342e;
+      --border-light: #4a4039;
+      --accent-red: #8b2c1a;
+      --accent-red-light: #c43d28;
+      --accent-orange: #d4843c;
+      --accent-orange-light: #e89a52;
+      --accent-green: #5a7c3a;
+      --text-primary: #e8dcc8;
+      --text-secondary: #a89880;
+      --text-muted: #6b5d4f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: 'LXGW WenKai', 'Noto Sans SC', sans-serif;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(139, 44, 26, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(212, 132, 60, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 0%, rgba(139, 44, 26, 0.03) 0%, transparent 40%);
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4, .font-serif-cn {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    /* ==================== 卡片样式 ==================== */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--border-light);
+    }
+
+    .card-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-orange);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==================== 按钮样式 ==================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: 'LXGW WenKai', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-input);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--border-light);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background-color: var(--accent-orange);
+      border-color: var(--accent-orange);
+      color: #1a1714;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-orange-light);
+      border-color: var(--accent-orange-light);
+    }
+
+    .btn-danger {
+      background-color: var(--accent-red);
+      border-color: var(--accent-red);
+      color: #e8dcc8;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--accent-red-light);
+      border-color: var(--accent-red-light);
+    }
+
+    .btn-success {
+      background-color: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #e8dcc8;
+    }
+
+    .btn-success:hover {
+      background-color: #6a8c4a;
+      border-color: #6a8c4a;
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+
+    .btn-active {
+      background-color: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+      color: #1a1714 !important;
+      font-weight: 600;
+    }
+
+    /* ==================== 输入框样式 ==================== */
+    .input {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: var(--text-primary);
+      font-family: 'LXGW WenKai', sans-serif;
+      font-size: 0.9rem;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .input:focus {
+      border-color: var(--accent-orange);
+    }
+
+    .input-number {
+      width: 70px;
+      text-align: center;
+    }
+
+    select.input {
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    select.input option {
+      background-color: var(--bg-card);
+    }
+
+    /* ==================== 进度条样式 ==================== */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    /* ==================== 标签页样式 ==================== */
+    .tab-btn {
+      padding: 10px 20px;
+      border-radius: 8px 8px 0 0;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+      border-bottom: none;
+      background-color: transparent;
+      color: var(--text-secondary);
+      font-family: 'LXGW WenKai', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-btn-active {
+      color: var(--accent-orange) !important;
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+      border-bottom: 2px solid var(--accent-orange) !important;
+      font-weight: 600;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content-active {
+      display: block;
+    }
+
+    /* ==================== 属性卡片样式 ==================== */
+    .stat-card {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-light);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 600;
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    /* ==================== 物品行样式 ==================== */
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: border-color 0.15s;
+    }
+
+    .item-row:hover {
+      border-color: var(--border-light);
+    }
+
+    /* ==================== Toast 样式 ==================== */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .toast {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      animation: toastFadeIn 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast-success {
+      background-color: var(--accent-green);
+      color: #e8dcc8;
+    }
+
+    .toast-error {
+      background-color: var(--accent-red);
+      color: #e8dcc8;
+    }
+
+    .toast-info {
+      background-color: var(--accent-orange);
+      color: #1a1714;
+    }
+
+    @keyframes toastFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==================== 模态框样式 ==================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    /* ==================== 滚动条样式 ==================== */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-light);
+    }
+
+    /* ==================== 辅助样式 ==================== */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-red { background-color: var(--accent-red); color: #e8dcc8; }
+    .badge-orange { background-color: var(--accent-orange); color: #1a1714; }
+    .badge-green { background-color: var(--accent-green); color: #e8dcc8; }
+    .badge-blue { background-color: #3b5998; color: #e8dcc8; }
+    .badge-purple { background-color: #6b46c1; color: #e8dcc8; }
+    .badge-gray { background-color: var(--border-color); color: var(--text-secondary); }
+    .badge-owned { background-color: rgba(107,142,107,.25); color: var(--accent-green); border: 1px solid rgba(107,142,107,.4); display: inline-flex; align-items: center; gap: 4px; }
+    .badge-unowned { background-color: rgba(0,0,0,.3); color: var(--text-muted); border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 4px; }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 16px 0;
+    }
+
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .text-orange { color: var(--accent-orange); }
+    .text-red { color: var(--accent-red-light); }
+    .text-green { color: var(--accent-green); }
+
+    .save-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .save-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ==================== 移动端响应式 (< 768px) ==================== */
+    @media (max-width: 767px) {
+      body { padding-bottom: 0; }
+
+      /* 主容器：全宽无内边距 */
+      #main-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        padding-bottom: 64px !important;
+      }
+
+      /* 顶部标题栏：sticky紧凑 */
+      #main-container > header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background-color: var(--bg-dark);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.5rem 0.8rem;
+        margin-bottom: 0 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      }
+      #main-container > header h1 { font-size: 1.1rem; }
+      #main-container > header p { font-size: 0.7rem; }
+      #main-container > header .w-12 { width: 36px; height: 36px; }
+      #main-container > header .w-12 i { font-size: 1.1rem; }
+
+      /* 快捷操作栏：横向滚动 */
+      #main-container > .card:first-of-type {
+        margin: 0.5rem !important;
+        padding: 10px 12px !important;
+        border-radius: 10px;
+      }
+      #main-container > .card:first-of-type .flex {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px !important;
+        padding-bottom: 2px;
+      }
+      #main-container > .card:first-of-type .flex::-webkit-scrollbar { height: 0; }
+      #main-container > .card:first-of-type .flex > span { flex-shrink: 0; white-space: nowrap; }
+      #main-container > .card:first-of-type .btn { flex-shrink: 0; }
+
+      /* 桌面端水平标签导航：隐藏 */
+      .desktop-nav { display: none !important; }
+
+      /* 底部导航栏 */
+      .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(180deg, #221c16, #161210);
+        border-top: 2px solid var(--accent-red);
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.6);
+        z-index: 1000;
+        padding: 0;
+      }
+      .mobile-nav .mn-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: var(--text-muted);
+        font-size: 0.66rem;
+        cursor: pointer;
+        border: none;
+        background: none;
+        transition: color 0.15s;
+        position: relative;
+      }
+      .mobile-nav .mn-item i { font-size: 1.15rem; }
+      .mobile-nav .mn-item.active { color: var(--accent-orange); }
+      .mobile-nav .mn-item.active::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 30%;
+        right: 30%;
+        height: 2px;
+        background: var(--accent-orange);
+        border-radius: 0 0 3px 3px;
+      }
+
+      /* 标签内容区：紧凑间距 */
+      #main-container > main { padding: 0.5rem !important; margin-top: 0 !important; }
+
+      /* 卡片：紧凑内边距 */
+      .card {
+        padding: 12px !important;
+        border-radius: 10px !important;
+        margin-bottom: 0.6rem !important;
+      }
+      .card-title {
+        font-size: 0.95rem !important;
+        margin-bottom: 10px !important;
+        padding-bottom: 8px !important;
+      }
+
+      /* 网格全部单列 */
+      .grid { grid-template-columns: 1fr !important; }
+
+      /* 属性卡片紧凑 */
+      .stat-card { padding: 10px !important; }
+      .stat-value { font-size: 1.1rem !important; }
+
+      /* 输入框和按钮更大触摸区 */
+      .input { padding: 8px 10px; font-size: 0.95rem; }
+      .btn { padding: 8px 14px; font-size: 0.85rem; }
+      .btn-sm { padding: 6px 10px; }
+
+      /* 物品行：紧凑 */
+      .item-row { padding: 8px 10px !important; }
+
+      /* 模态框：全宽 */
+      .modal-content {
+        max-width: 100% !important;
+        max-height: 90vh !important;
+        padding: 16px !important;
+        border-radius: 10px !important;
+      }
+
+      /* 底部状态栏：隐藏 */
+      #main-container > footer { display: none !important; }
+
+      /* 无存档遮罩：紧凑 */
+      #no-save-overlay .card { max-width: 92% !important; padding: 20px !important; }
+    }
+
+    /* 桌面端隐藏移动导航 */
+    @media (min-width: 768px) {
+      .mobile-nav { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== 无存档提示遮罩 ==================== -->
+<div id="no-save-overlay" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: var(--bg-dark);">
+  <div class="card text-center" style="max-width: 450px;">
+    <i class="fas fa-exclamation-triangle text-5xl mb-4" style="color: var(--accent-orange);"></i>
+    <h2 class="font-serif-cn text-2xl mb-3" style="color: var(--accent-orange);">未找到存档</h2>
+    <p class="text-secondary mb-6">localStorage 中没有找到废土编年史的存档数据。<br>请先在游戏中创建存档，或点击下方按钮创建一个默认存档。</p>
+    <div class="flex gap-3 justify-center">
+      <button class="btn btn-primary" onclick="createNewSave()">
+        <i class="fas fa-plus"></i> 创建默认存档
+      </button>
+      <a href="index.html" class="btn">
+        <i class="fas fa-gamepad"></i> 返回游戏
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 主容器 ==================== -->
+<div id="main-container" class="hidden max-w-7xl mx-auto px-4 py-6">
+
+  <!-- ==================== 顶部标题栏 ==================== -->
+  <header class="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: var(--accent-red);">
+        <i class="fas fa-skull text-2xl" style="color: var(--text-primary);"></i>
+      </div>
+      <div>
+        <h1 class="font-serif-cn text-2xl font-bold" style="color: var(--accent-orange);">废土编年史</h1>
+        <p class="text-sm text-secondary">后台管理系统</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="save-indicator">
+        <span class="save-dot"></span>
+        <span id="save-status">就绪</span>
+      </div>
+      <a href="index.html" class="btn btn-primary">
+        <i class="fas fa-gamepad"></i> 返回游戏
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== 快捷操作栏 ==================== -->
+  <div class="card mb-4">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-secondary text-sm font-semibold mr-2">
+        <i class="fas fa-bolt" style="color: var(--accent-orange);"></i> 快捷操作：
+      </span>
+      <button class="btn btn-success btn-sm" onclick="quickFullHeal()">
+        <i class="fas fa-heart"></i> 满血满状态
+      </button>
+      <button class="btn btn-sm" style="background-color: #8a6d1a; border-color: #8a6d1a; color: #e8dcc8;" onclick="quickAddCaps()">
+        <i class="fas fa-coins"></i> +1000 瓶盖
+      </button>
+      <button class="btn btn-sm" style="background-color: #4a5a2a; border-color: #4a5a2a; color: #e8dcc8;" onclick="quickAddMaterials()">
+        <i class="fas fa-cubes"></i> 添加所有材料
+      </button>
+      <button class="btn btn-sm" onclick="quickAddFood()">
+        <i class="fas fa-utensils"></i> 补充食物水
+      </button>
+      <div class="flex-1"></div>
+      <button class="btn btn-sm" onclick="exportSave()">
+        <i class="fas fa-download"></i> 导出存档JSON
+      </button>
+      <button class="btn btn-danger btn-sm" onclick="confirmReset()">
+        <i class="fas fa-trash"></i> 重置存档
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 标签页导航（桌面端） ==================== -->
+  <nav class="desktop-nav flex gap-1 border-b overflow-x-auto" style="border-color: var(--border-color);">
+    <button class="tab-btn tab-btn-active" data-tab="player" onclick="switchTab('player')">
+      <i class="fas fa-user"></i> 玩家属性
+    </button>
+    <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">
+      <i class="fas fa-backpack"></i> 背包
+    </button>
+    <button class="tab-btn" data-tab="equipment" onclick="switchTab('equipment')">
+      <i class="fas fa-shield-halved"></i> 装备
+    </button>
+    <button class="tab-btn" data-tab="shelter" onclick="switchTab('shelter')">
+      <i class="fas fa-house"></i> 设施
+    </button>
+    <button class="tab-btn" data-tab="shop" onclick="switchTab('shop')">
+      <i class="fas fa-store"></i> 商店
+    </button>
+    <button class="tab-btn" data-tab="conditions" onclick="switchTab('conditions')">
+      <i class="fas fa-disease"></i> 状态旗帜
+    </button>
+  </nav>
+
+  <!-- ==================== 标签页内容区 ==================== -->
+  <main class="mt-4">
+
+    <!-- ========== 玩家属性 ========== -->
+    <div id="tab-player" class="tab-content tab-content-active">
+      <!-- 玩家名称 -->
+      <div class="card mb-4">
+        <div class="card-title"><i class="fas fa-id-card"></i> 幸存者信息</div>
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex items-center gap-2">
+            <label class="text-secondary text-sm">姓名：</label>
+            <input type="text" id="player-name" class="input" style="width: 200px;" onchange="setPlayerName(this.value)">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-secondary text-sm">阶段：</span>
+            <button class="btn btn-sm" data-phase="day" onclick="setPhase('day')">白昼</button>
+            <button class="btn btn-sm" data-phase="night" onclick="setPhase('night')">夜晚</button>
+            <button class="btn btn-sm" data-phase="settlement" onclick="setPhase('settlement')">结算</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-secondary text-sm">季节：</span>
+            <button class="btn btn-sm" data-season="spring" onclick="setSeason('spring')">春</button>
+            <button class="btn btn-sm" data-season="summer" onclick="setSeason('summer')">夏</button>
+            <button class="btn btn-sm" data-season="autumn" onclick="setSeason('autumn')">秋</button>
+            <button class="btn btn-sm" data-season="winter" onclick="setSeason('winter')">冬</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 生命状态 -->
+      <div class="card mb-4">
+        <div class="card-title"><i class="fas fa-heart-pulse"></i> 生命状态</div>
+        <div id="player-vitals" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- 资源与天数 -->
+      <div class="card mb-4">
+        <div class="card-title"><i class="fas fa-sack-dollar"></i> 资源与天数</div>
+        <div id="player-resources" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- 统计数据 -->
+      <div class="card mb-4">
+        <div class="card-title"><i class="fas fa-chart-line"></i> 统计数据</div>
+        <div id="player-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      </div>
+
+      <!-- 存档信息 -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-database"></i> 存档元信息</div>
+        <div id="meta-info" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+      </div>
+    </div>
+
+    <!-- ========== 背包管理 ========== -->
+    <div id="tab-inventory" class="tab-content">
+      <div class="card mb-4">
+        <div class="card-title">
+          <i class="fas fa-backpack"></i> 背包管理
+          <span id="inventory-count" class="badge badge-gray ml-auto"></span>
+        </div>
+        <!-- 分类筛选 -->
+        <div class="flex items-center gap-2 flex-wrap mb-4">
+          <span class="text-secondary text-sm">筛选：</span>
+          <button class="btn btn-sm btn-active" data-inv-filter="all" onclick="filterInventory('all')">全部</button>
+          <button class="btn btn-sm" data-inv-filter="food" onclick="filterInventory('food')"><i class="fas fa-utensils"></i> 食物</button>
+          <button class="btn btn-sm" data-inv-filter="drink" onclick="filterInventory('drink')"><i class="fas fa-droplet"></i> 水</button>
+          <button class="btn btn-sm" data-inv-filter="material" onclick="filterInventory('material')"><i class="fas fa-cubes"></i> 材料</button>
+          <button class="btn btn-sm" data-inv-filter="medical" onclick="filterInventory('medical')"><i class="fas fa-briefcase-medical"></i> 医疗</button>
+          <button class="btn btn-sm" data-inv-filter="weapon" onclick="filterInventory('weapon')"><i class="fas fa-gun"></i> 武器</button>
+          <button class="btn btn-sm" data-inv-filter="armor" onclick="filterInventory('armor')"><i class="fas fa-shield-halved"></i> 防具</button>
+          <button class="btn btn-sm" data-inv-filter="fuel" onclick="filterInventory('fuel')"><i class="fas fa-gas-pump"></i> 燃料</button>
+          <button class="btn btn-sm" data-inv-filter="special" onclick="filterInventory('special')"><i class="fas fa-gem"></i> 珍品</button>
+          <button class="btn btn-sm" data-inv-filter="other" onclick="filterInventory('other')"><i class="fas fa-box"></i> 其他</button>
+        </div>
+        <!-- 物品列表 -->
+        <div id="inventory-list" class="flex flex-col gap-2"></div>
+        <div id="inventory-empty" class="text-center py-8 text-muted hidden">
+          <i class="fas fa-box-open text-4xl mb-3"></i>
+          <p>背包中没有物品</p>
+        </div>
+      </div>
+
+      <!-- 添加新物品 -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-plus-circle"></i> 添加物品</div>
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">物品ID</label>
+            <input type="text" id="new-item-id" class="input" style="width: 220px;" list="item-list" placeholder="输入或选择物品ID">
+            <datalist id="item-list"></datalist>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">数量</label>
+            <input type="number" id="new-item-qty" class="input input-number" value="1" min="1">
+          </div>
+          <button class="btn btn-primary" onclick="addNewItem()">
+            <i class="fas fa-plus"></i> 添加到背包
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 装备管理 ========== -->
+    <div id="tab-equipment" class="tab-content">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 武器 -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-gun"></i> 武器</div>
+          <div id="equip-weapon" class="mb-4"></div>
+          <div class="flex flex-col gap-2">
+            <label class="text-secondary text-sm">更换武器：</label>
+            <select id="weapon-select" class="input" onchange="changeEquipment('weapon', this.value)">
+              <option value="">-- 卸下武器 --</option>
+            </select>
+          </div>
+        </div>
+        <!-- 防具 -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-shield-halved"></i> 防具</div>
+          <div id="equip-armor" class="mb-4"></div>
+          <div class="flex flex-col gap-2">
+            <label class="text-secondary text-sm">更换防具：</label>
+            <select id="armor-select" class="input" onchange="changeEquipment('armor', this.value)">
+              <option value="">-- 卸下防具 --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 设施管理 ========== -->
+    <div id="tab-shelter" class="tab-content">
+      <div class="card mb-4">
+        <div class="card-title">
+          <i class="fas fa-house"></i> 避难所设施
+          <span id="shelter-count" class="badge badge-gray ml-auto"></span>
+        </div>
+        <div id="shelter-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        <div id="shelter-empty" class="text-center py-8 text-muted hidden">
+          <i class="fas fa-house-circle-exclamation text-4xl mb-3"></i>
+          <p>避难所中尚未建造任何设施</p>
+        </div>
+      </div>
+
+      <!-- 添加新设施 -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-plus-circle"></i> 建造新设施</div>
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">设施类型</label>
+            <select id="new-facility-select" class="input" style="min-width: 180px;"></select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">初始等级</label>
+            <input type="number" id="new-facility-level" class="input input-number" value="1" min="1" max="5">
+          </div>
+          <button class="btn btn-primary" onclick="addNewFacility()">
+            <i class="fas fa-hammer"></i> 建造
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 商店管理 ========== -->
+    <div id="tab-shop" class="tab-content">
+      <div class="card mb-4">
+        <div class="card-title">
+          <i class="fas fa-store"></i> 商店库存
+          <button class="btn btn-primary btn-sm ml-auto" onclick="restockShop()">
+            <i class="fas fa-truck-ramp-box"></i> 手动补货
+          </button>
+        </div>
+        <div class="flex items-center gap-4 mb-4 flex-wrap">
+          <div class="flex items-center gap-2">
+            <span class="text-secondary text-sm">上次补货日：</span>
+            <input type="number" id="shop-restock-day" class="input input-number" onchange="setRestockDay(this.value)">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-secondary text-sm">随机商品数：</span>
+            <span id="shop-random-count" class="badge badge-orange">0</span>
+          </div>
+        </div>
+        <div id="shop-stock-list" class="flex flex-col gap-2"></div>
+        <div id="shop-empty" class="text-center py-8 text-muted hidden">
+          <i class="fas fa-store-slash text-4xl mb-3"></i>
+          <p>商店库存为空</p>
+        </div>
+      </div>
+
+      <!-- 添加商品 -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-plus-circle"></i> 添加商品</div>
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">物品ID</label>
+            <input type="text" id="new-shop-item-id" class="input" style="width: 220px;" list="item-list" placeholder="输入或选择物品ID">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">数量</label>
+            <input type="number" id="new-shop-item-qty" class="input input-number" value="5" min="1">
+          </div>
+          <button class="btn btn-primary" onclick="addShopItem()">
+            <i class="fas fa-plus"></i> 添加商品
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 状态与旗帜 ========== -->
+    <div id="tab-conditions" class="tab-content">
+      <!-- 状态效果 -->
+      <div class="card mb-4">
+        <div class="card-title">
+          <i class="fas fa-disease"></i> 状态效果
+          <span id="conditions-count" class="badge badge-gray ml-auto"></span>
+        </div>
+        <div id="conditions-list" class="flex flex-col gap-2"></div>
+        <div id="conditions-empty" class="text-center py-6 text-muted hidden">
+          <i class="fas fa-circle-check text-3xl mb-2" style="color: var(--accent-green);"></i>
+          <p>当前没有任何状态效果</p>
+        </div>
+        <div class="divider"></div>
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">状态类型</label>
+            <select id="new-condition-select" class="input" style="min-width: 180px;"></select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">持续天数</label>
+            <input type="number" id="new-condition-duration" class="input input-number" value="1" min="1">
+          </div>
+          <button class="btn btn-danger" onclick="addCondition()">
+            <i class="fas fa-plus"></i> 添加状态
+          </button>
+        </div>
+      </div>
+
+      <!-- 旗帜 -->
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-flag"></i> 旗帜标记
+          <span id="flags-count" class="badge badge-gray ml-auto"></span>
+        </div>
+        <div id="flags-list" class="flex flex-col gap-2"></div>
+        <div id="flags-empty" class="text-center py-6 text-muted hidden">
+          <i class="fas fa-flag text-3xl mb-2"></i>
+          <p>当前没有任何旗帜标记</p>
+        </div>
+        <div class="divider"></div>
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">旗帜名称（英文ID）</label>
+            <input type="text" id="new-flag-key" class="input" style="width: 220px;" placeholder="如 helped_neighbor">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-secondary text-xs">值</label>
+            <select id="new-flag-value" class="input">
+              <option value="true">true（真）</option>
+              <option value="false">false（假）</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addFlag()">
+            <i class="fas fa-plus"></i> 添加旗帜
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== 底部状态栏 ==================== -->
+  <footer class="mt-6 py-4 text-center text-sm text-muted border-t" style="border-color: var(--border-color);">
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <span><i class="fas fa-database"></i> 存档版本: <span id="footer-version">3</span></span>
+      <span><i class="fas fa-clock"></i> 最后保存: <span id="footer-savetime">--</span></span>
+      <span><i class="fas fa-code"></i> wasteland_chronicles_save_v3</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ==================== 移动端底部导航栏 ==================== -->
+<nav class="mobile-nav" style="display:none;">
+  <button class="mn-item active" data-tab="player" onclick="switchTab('player')">
+    <i class="fas fa-user"></i><span>属性</span>
+  </button>
+  <button class="mn-item" data-tab="inventory" onclick="switchTab('inventory')">
+    <i class="fas fa-backpack"></i><span>背包</span>
+  </button>
+  <button class="mn-item" data-tab="equipment" onclick="switchTab('equipment')">
+    <i class="fas fa-shield-halved"></i><span>装备</span>
+  </button>
+  <button class="mn-item" data-tab="shelter" onclick="switchTab('shelter')">
+    <i class="fas fa-house"></i><span>设施</span>
+  </button>
+  <button class="mn-item" data-tab="shop" onclick="switchTab('shop')">
+    <i class="fas fa-store"></i><span>商店</span>
+  </button>
+  <button class="mn-item" data-tab="conditions" onclick="switchTab('conditions')">
+    <i class="fas fa-disease"></i><span>状态</span>
+  </button>
+</nav>
+
+<!-- ==================== Toast 容器 ==================== -->
+<div id="toast-container"></div>
+
+<!-- ==================== 模态框容器 ==================== -->
+<div id="modal-container"></div>
+
+<!-- 引入游戏物品数据，确保admin物品ID与游戏完全一致 -->
+<script src="js/data/items.js"></script>
+<script src="js/data/items_extra.js"></script>
+
+<script>
+/* ============================================================
+ * 废土编年史 - 后台管理脚本
+ * 所有修改实时保存到 localStorage
+ * ============================================================ */
+
+// ==================== 常量 ====================
+const SAVE_KEY = "wasteland_chronicles_save_v3";
+
+// ==================== 物品数据库 ====================
+// 从游戏数据 GameData.items 动态构建，确保物品ID与游戏完全一致
+const ITEM_DB = {};
+(function buildItemDB() {
+  if (window.GameData && GameData.items) {
+    // 游戏分类 → admin显示分类映射
+    const catMap = { food:"food", water:"drink", medicine:"medical", material:"material",
+                     weapon:"weapon", armor:"armor", fuel:"fuel", special:"special" };
+    for (const id in GameData.items) {
+      const it = GameData.items[id];
+      ITEM_DB[id] = { name: it.name, category: catMap[it.category] || "other" };
+    }
+  }
+})();
+
+// ==================== 设施数据库 ====================
+const FACILITY_DB = {
+  workshop:        { name: "工作台",       icon: "fa-screwdriver-wrench", maxLevel: 3 },
+  bed:             { name: "床铺",         icon: "fa-bed",                maxLevel: 1 },
+  heater:          { name: "火炉",         icon: "fa-fire-flame-curved",  maxLevel: 2 },
+  stove:           { name: "炉灶",         icon: "fa-fire-burner",        maxLevel: 2 },
+  rain_collector:  { name: "雨水收集器",   icon: "fa-cloud-rain",         maxLevel: 2 },
+  garden:          { name: "菜园",         icon: "fa-seedling",           maxLevel: 2 },
+  infirmary:       { name: "医务室",       icon: "fa-staff-snake",        maxLevel: 2 },
+  distillery:      { name: "蒸馏器",       icon: "fa-flask",              maxLevel: 1 },
+  watchtower:      { name: "瞭望塔",       icon: "fa-tower-observation",  maxLevel: 2 },
+  reinforced_door: { name: "强化门",       icon: "fa-door-closed",        maxLevel: 1 },
+  radio_station:   { name: "收音机",       icon: "fa-tower-broadcast",    maxLevel: 1 },
+  generator:       { name: "发电机",       icon: "fa-plug",               maxLevel: 2 },
+  smokehouse:      { name: "熏制房",       icon: "fa-smoking",            maxLevel: 1 },
+  fish_pond:       { name: "鱼塘",         icon: "fa-fish",               maxLevel: 2 },
+  trap:            { name: "陷阱",         icon: "fa-mound",              maxLevel: 2 },
+  water_well:      { name: "水井",         icon: "fa-water",              maxLevel: 1 },
+  armory:          { name: "军械台",       icon: "fa-shield-halved",      maxLevel: 2 },
+};
+
+// ==================== 状态效果数据库 ====================
+const CONDITION_DB = {
+  bleeding:    { name: "出血",     icon: "fa-droplet",      color: "red" },
+  sick:        { name: "生病",     icon: "fa-virus",        color: "green" },
+  poisoned:    { name: "中毒",     icon: "fa-skull-crossbones", color: "green" },
+  radiation:   { name: "辐射病",   icon: "fa-radiation",    color: "yellow" },
+  injured:     { name: "受伤",     icon: "fa-bandage",      color: "red" },
+  exhausted:   { name: "精疲力竭", icon: "fa-tired",        color: "purple" },
+  starvation:  { name: "饥饿",     icon: "fa-utensils",     color: "orange" },
+  dehydration: { name: "脱水",     icon: "fa-droplet-slash", color: "blue" },
+  infected:    { name: "感染",     icon: "fa-virus",        color: "red" },
+  freezing:    { name: "冻伤",     icon: "fa-snowflake",    color: "blue" },
+  burning:     { name: "灼伤",     icon: "fa-fire",         color: "red" },
+  cursed:      { name: "诅咒",     icon: "fa-ghost",        color: "purple" },
+};
+
+// ==================== 武器数据库（用于装备选择） ====================
+// ==================== 武器/防具列表（从游戏数据动态构建） ====================
+const WEAPON_LIST = [];
+const ARMOR_LIST = [];
+(function buildEquipLists() {
+  if (window.GameData && GameData.items) {
+    for (const id in GameData.items) {
+      const it = GameData.items[id];
+      if (it.weapon) WEAPON_LIST.push(id);
+      if (it.armor) ARMOR_LIST.push(id);
+    }
+  }
+})();
+
+// ==================== 所有材料列表（用于快捷操作） ====================
+const ALL_MATERIALS = {};
+(function buildMaterialList() {
+  if (window.GameData && GameData.items) {
+    for (const id in GameData.items) {
+      if (GameData.items[id].category === "material") {
+        ALL_MATERIALS[id] = 30;
+      }
+    }
+  }
+})();
+
+// ==================== 补货物品列表 ====================
+const RESTOCK_ITEMS = {
+  canned_food: 5, clean_water: 5, bandage: 3, meds: 2,
+  scrap: 10, wood: 10, cloth: 8, painkiller: 3,
+  radaway: 2, battery: 5,
+};
+
+// ==================== 玩家属性配置 ====================
+const PLAYER_STATS_CONFIG = [
+  { key: "hp",        label: "生命值",     icon: "fa-heart",          color: "#c43d28", min: 0,   maxRef: "maxHp",  step: 10,  group: "vitals",   hasProgress: true },
+  { key: "maxHp",     label: "最大生命值", icon: "fa-heart-pulse",    color: "#c43d28", min: 1,   max: 9999,         step: 10,  group: "vitals" },
+  { key: "hunger",    label: "饱食度",     icon: "fa-utensils",       color: "#d4843c", min: 0,   max: 100,          step: 10,  group: "vitals",   hasProgress: true },
+  { key: "thirst",    label: "水分",       icon: "fa-droplet",        color: "#3b82f6", min: 0,   max: 100,          step: 10,  group: "vitals",   hasProgress: true },
+  { key: "fatigue",   label: "疲劳值",     icon: "fa-bed",            color: "#8b5cf6", min: 0,   max: 100,          step: 10,  group: "vitals",   hasProgress: true },
+  { key: "morale",    label: "精神值",     icon: "fa-face-smile",     color: "#22c55e", min: 0,   max: 100,          step: 10,  group: "vitals",   hasProgress: true },
+  { key: "radiation", label: "辐射值",     icon: "fa-radiation",      color: "#eab308", min: 0,   max: 100,          step: 10,  group: "vitals",   hasProgress: true },
+  { key: "caps",      label: "瓶盖",       icon: "fa-coins",          color: "#eab308", min: 0,   max: 999999,       step: 100, group: "resources" },
+  { key: "day",       label: "天数",       icon: "fa-calendar-day",   color: "#d4843c", min: 1,   max: 9999,         step: 1,   group: "resources" },
+  { key: "seasonDay", label: "季节天数",   icon: "fa-calendar",       color: "#d4843c", min: 1,   max: 30,           step: 1,   group: "resources" },
+  { key: "goodPoints",  label: "善行点",   icon: "fa-star",           color: "#3b82f6", min: 0,   max: 9999,         step: 1,   group: "stats" },
+  { key: "karmaPoints", label: "罪孽点",   icon: "fa-skull",          color: "#c43d28", min: 0,   max: 9999,         step: 1,   group: "stats" },
+  { key: "kills",     label: "击杀数",     icon: "fa-crosshairs",     color: "#c43d28", min: 0,   max: 99999,        step: 1,   group: "stats" },
+  { key: "scavenges", label: "搜刮次数",   icon: "fa-magnifying-glass", color: "#d4843c", min: 0, max: 99999,        step: 1,   group: "stats" },
+];
+
+// ==================== 全局状态 ====================
+let saveData = null;
+let currentTab = "player";
+let inventoryFilter = "all";
+
+// ==================== 核心功能 ====================
+
+/**
+ * 从 localStorage 加载存档数据
+ */
+function loadSave() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) {
+    saveData = null;
+    return false;
+  }
+  try {
+    saveData = JSON.parse(raw);
+    ensureStructure();
+    return true;
+  } catch (e) {
+    console.error("存档解析失败:", e);
+    saveData = null;
+    return false;
+  }
+}
+
+/**
+ * 确保数据结构完整
+ */
+function ensureStructure() {
+  if (!saveData) return;
+  saveData.version = saveData.version || 3;
+  saveData.meta = saveData.meta || { saveTime: 0, playTime: 0, started: 0 };
+  saveData.player = saveData.player || {};
+  const p = saveData.player;
+  p.name = p.name || "无名幸存者";
+  p.hp = p.hp ?? 100;
+  p.maxHp = p.maxHp ?? 100;
+  p.hunger = p.hunger ?? 80;
+  p.thirst = p.thirst ?? 80;
+  p.fatigue = p.fatigue ?? 0;
+  p.morale = p.morale ?? 60;
+  p.radiation = p.radiation ?? 0;
+  p.caps = p.caps ?? 20;
+  p.day = p.day ?? 1;
+  p.phase = p.phase || "day";
+  p.season = p.season || "autumn";
+  p.seasonDay = p.seasonDay ?? 1;
+  p.conditions = p.conditions || {};
+  p.flags = p.flags || {};
+  p.goodPoints = p.goodPoints ?? 0;
+  p.karmaPoints = p.karmaPoints ?? 0;
+  p.kills = p.kills ?? 0;
+  p.scavenges = p.scavenges ?? 0;
+  saveData.inventory = saveData.inventory || {};
+  saveData.shelter = saveData.shelter || {};
+  saveData.equipped = saveData.equipped || { weapon: null, armor: null };
+  saveData.shop = saveData.shop || { stock: {}, lastRestockDay: 0, randomItems: [] };
+  saveData.shop.stock = saveData.shop.stock || {};
+  saveData.shop.randomItems = saveData.shop.randomItems || [];
+  saveData.log = saveData.log || [];
+  saveData.ui = saveData.ui || { activeTab: "shelter" };
+}
+
+/**
+ * 保存数据到 localStorage
+ */
+function save() {
+  if (!saveData) return;
+  saveData.meta = saveData.meta || {};
+  saveData.meta.saveTime = Date.now();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+  updateSaveStatus();
+}
+
+/**
+ * 更新保存状态显示
+ */
+function updateSaveStatus() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("zh-CN", { hour12: false });
+  const el = document.getElementById("save-status");
+  if (el) el.textContent = "已保存 " + timeStr;
+  const footerEl = document.getElementById("footer-savetime");
+  if (footerEl) footerEl.textContent = timeStr;
+}
+
+/**
+ * 显示 Toast 提示
+ * @param {string} msg - 提示消息
+ * @param {string} type - 类型: success / error / info
+ */
+function showToast(msg, type) {
+  type = type || "info";
+  const container = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = "toast toast-" + type;
+  const icon = type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle";
+  toast.innerHTML = '<i class="fas ' + icon + '"></i> ' + msg;
+  container.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = "0";
+    toast.style.transition = "opacity 0.3s";
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 2000);
+}
+
+/**
+ * 创建默认存档
+ */
+function createNewSave() {
+  saveData = {
+    version: 3,
+    meta: { saveTime: Date.now(), playTime: 0, started: Date.now() },
+    player: {
+      name: "无名幸存者",
+      hp: 100, maxHp: 100,
+      hunger: 80, thirst: 80, fatigue: 0, morale: 60, radiation: 0,
+      caps: 20, day: 1, phase: "day", season: "autumn", seasonDay: 1,
+      conditions: {},
+      flags: {},
+      goodPoints: 0, karmaPoints: 0,
+      kills: 0, scavenges: 0
+    },
+    inventory: { canned_food: 2, clean_water: 2 },
+    shelter: { workshop: { level: 1 } },
+    equipped: { weapon: "crowbar", armor: null },
+    shop: { stock: {}, lastRestockDay: 0, randomItems: [] },
+    log: [],
+    ui: { activeTab: "shelter" }
+  };
+  save();
+  showToast("已创建默认存档", "success");
+  initPage();
+}
+
+// ==================== 标签页切换 ====================
+
+/**
+ * 切换标签页
+ * @param {string} tab - 标签页ID
+ */
+function switchTab(tab) {
+  currentTab = tab;
+  // 更新桌面端按钮状态
+  document.querySelectorAll(".tab-btn").forEach(function(btn) {
+    if (btn.dataset.tab === tab) {
+      btn.classList.add("tab-btn-active");
+    } else {
+      btn.classList.remove("tab-btn-active");
+    }
+  });
+  // 更新移动端底部导航状态
+  document.querySelectorAll(".mn-item").forEach(function(btn) {
+    if (btn.dataset.tab === tab) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+  // 更新内容显示
+  document.querySelectorAll(".tab-content").forEach(function(el) {
+    if (el.id === "tab-" + tab) {
+      el.classList.add("tab-content-active");
+    } else {
+      el.classList.remove("tab-content-active");
+    }
+  });
+  // 重新渲染当前标签页
+  renderTab(tab);
+  // 移动端滚动回顶部
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/**
+ * 渲染指定标签页
+ */
+function renderTab(tab) {
+  if (!saveData) return;
+  switch (tab) {
+    case "player": renderPlayer(); break;
+    case "inventory": renderInventory(); break;
+    case "equipment": renderEquipment(); break;
+    case "shelter": renderShelter(); break;
+    case "shop": renderShop(); break;
+    case "conditions": renderConditions(); renderFlags(); break;
+  }
+}
+
+/**
+ * 渲染所有标签页
+ */
+function renderAll() {
+  renderPlayer();
+  renderInventory();
+  renderEquipment();
+  renderShelter();
+  renderShop();
+  renderConditions();
+  renderFlags();
+  updateFooter();
+}
+
+// ==================== 玩家属性渲染 ====================
+
+/**
+ * 渲染玩家属性
+ */
+function renderPlayer() {
+  if (!saveData) return;
+  const p = saveData.player;
+
+  // 玩家名称
+  const nameInput = document.getElementById("player-name");
+  if (nameInput) nameInput.value = p.name || "";
+
+  // 阶段按钮高亮
+  document.querySelectorAll("[data-phase]").forEach(function(btn) {
+    if (btn.dataset.phase === p.phase) {
+      btn.classList.add("btn-active");
+    } else {
+      btn.classList.remove("btn-active");
+    }
+  });
+
+  // 季节按钮高亮
+  document.querySelectorAll("[data-season]").forEach(function(btn) {
+    if (btn.dataset.season === p.season) {
+      btn.classList.add("btn-active");
+    } else {
+      btn.classList.remove("btn-active");
+    }
+  });
+
+  // 渲染属性卡片
+  renderStatGroup("player-vitals", "vitals");
+  renderStatGroup("player-resources", "resources");
+  renderStatGroup("player-stats", "stats");
+
+  // 渲染元信息
+  renderMetaInfo();
+}
+
+/**
+ * 渲染属性组
+ * @param {string} containerId - 容器元素ID
+ * @param {string} group - 属性组名
+ */
+function renderStatGroup(containerId, group) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const stats = PLAYER_STATS_CONFIG.filter(function(s) { return s.group === group; });
+  let html = "";
+  stats.forEach(function(stat) {
+    html += renderStatCard(stat);
+  });
+  container.innerHTML = html;
+}
+
+/**
+ * 渲染单个属性卡片
+ * @param {object} stat - 属性配置
+ * @returns {string} HTML字符串
+ */
+function renderStatCard(stat) {
+  const value = saveData.player[stat.key] ?? 0;
+  const maxVal = stat.maxRef ? (saveData.player[stat.maxRef] || 1) : (stat.max || 100);
+  const progressPercent = stat.hasProgress ? Math.min(100, (value / maxVal) * 100) : 0;
+
+  let progressHtml = "";
+  if (stat.hasProgress) {
+    progressHtml = '<div class="progress-bar"><div class="progress-fill" style="width:' +
+      progressPercent + '%; background-color:' + stat.color + ';"></div></div>';
+  }
+
+  const displayValue = stat.hasProgress && stat.maxRef
+    ? value + " / " + maxVal
+    : value;
+
+  return '<div class="stat-card">' +
+    '<div class="flex justify-between items-center mb-1">' +
+      '<span class="stat-label"><i class="fas ' + stat.icon + '" style="color:' + stat.color + ';"></i> ' + stat.label + '</span>' +
+      '<span class="stat-value" style="color:' + stat.color + ';">' + displayValue + '</span>' +
+    '</div>' +
+    progressHtml +
+    '<div class="flex items-center gap-1 mt-2">' +
+      '<button class="btn btn-sm" onclick="adjustStat(\'' + stat.key + '\', -' + stat.step + ')">-' + stat.step + '</button>' +
+      '<input type="number" class="input input-number flex-1" value="' + value + '" ' +
+        'onchange="setStat(\'' + stat.key + '\', this.value)" min="' + stat.min + '"' +
+        (stat.max ? ' max="' + stat.max + '"' : '') + '>' +
+      '<button class="btn btn-sm" onclick="adjustStat(\'' + stat.key + '\', ' + stat.step + ')">+' + stat.step + '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/**
+ * 渲染存档元信息
+ */
+function renderMetaInfo() {
+  const container = document.getElementById("meta-info");
+  if (!container) return;
+  const meta = saveData.meta || {};
+  const saveTime = meta.saveTime ? new Date(meta.saveTime).toLocaleString("zh-CN") : "未知";
+  const started = meta.started ? new Date(meta.started).toLocaleString("zh-CN") : "未知";
+  const playTime = meta.playTime || 0;
+  const hours = Math.floor(playTime / 3600);
+  const mins = Math.floor((playTime % 3600) / 60);
+  const secs = playTime % 60;
+  const playTimeStr = hours + "时 " + mins + "分 " + secs + "秒";
+
+  container.innerHTML =
+    '<div class="stat-card"><div class="stat-label"><i class="fas fa-floppy-disk"></i> 保存时间</div><div class="text-sm mt-1">' + saveTime + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label"><i class="fas fa-play"></i> 游戏开始</div><div class="text-sm mt-1">' + started + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label"><i class="fas fa-stopwatch"></i> 游戏时长</div><div class="text-sm mt-1">' + playTimeStr + '</div></div>';
+}
+
+// ==================== 玩家属性操作 ====================
+
+/**
+ * 设置玩家名称
+ */
+function setPlayerName(name) {
+  if (!saveData) return;
+  saveData.player.name = name || "无名幸存者";
+  save();
+  showToast("已修改名称: " + saveData.player.name, "success");
+}
+
+/**
+ * 调整属性值（增减）
+ * @param {string} key - 属性键名
+ * @param {number} delta - 增减量
+ */
+function adjustStat(key, delta) {
+  if (!saveData) return;
+  const config = PLAYER_STATS_CONFIG.find(function(s) { return s.key === key; });
+  if (!config) return;
+  let newValue = (saveData.player[key] || 0) + delta;
+  newValue = clampStat(key, newValue, config);
+  saveData.player[key] = newValue;
+  save();
+  renderPlayer();
+}
+
+/**
+ * 直接设置属性值
+ * @param {string} key - 属性键名
+ * @param {string|number} value - 新值
+ */
+function setStat(key, value) {
+  if (!saveData) return;
+  const config = PLAYER_STATS_CONFIG.find(function(s) { return s.key === key; });
+  if (!config) return;
+  let newValue = parseInt(value);
+  if (isNaN(newValue)) newValue = config.min;
+  newValue = clampStat(key, newValue, config);
+  saveData.player[key] = newValue;
+  save();
+  renderPlayer();
+}
+
+/**
+ * 限制属性值在有效范围内
+ */
+function clampStat(key, value, config) {
+  if (value < config.min) value = config.min;
+  if (config.maxRef) {
+    const maxVal = saveData.player[config.maxRef] || 1;
+    if (value > maxVal) value = maxVal;
+  } else if (config.max) {
+    if (value > config.max) value = config.max;
+  }
+  return value;
+}
+
+/**
+ * 设置阶段
+ */
+function setPhase(phase) {
+  if (!saveData) return;
+  saveData.player.phase = phase;
+  save();
+  renderPlayer();
+  const names = { day: "白昼", night: "夜晚", settlement: "结算" };
+  showToast("阶段已设为: " + (names[phase] || phase), "success");
+}
+
+/**
+ * 设置季节
+ */
+function setSeason(season) {
+  if (!saveData) return;
+  saveData.player.season = season;
+  saveData.player.seasonDay = 1;
+  save();
+  renderPlayer();
+  const names = { spring: "春", summer: "夏", autumn: "秋", winter: "冬" };
+  showToast("季节已设为: " + (names[season] || season), "success");
+}
+
+// ==================== 背包管理 ====================
+
+/**
+ * 渲染背包
+ */
+function renderInventory() {
+  if (!saveData) return;
+  const inv = saveData.inventory || {};
+  const keys = Object.keys(inv);
+  const count = keys.length;
+
+  // 更新计数
+  const countEl = document.getElementById("inventory-count");
+  if (countEl) countEl.textContent = "共 " + count + " 种物品";
+
+  // 更新物品列表
+  const listEl = document.getElementById("inventory-list");
+  const emptyEl = document.getElementById("inventory-empty");
+
+  if (count === 0) {
+    listEl.innerHTML = "";
+    emptyEl.classList.remove("hidden");
+    return;
+  }
+  emptyEl.classList.add("hidden");
+
+  // 筛选物品
+  let filteredKeys = keys.filter(function(key) {
+    if (inventoryFilter === "all") return true;
+    const info = ITEM_DB[key];
+    if (!info) return inventoryFilter === "other";
+    return info.category === inventoryFilter;
+  });
+
+  if (filteredKeys.length === 0) {
+    listEl.innerHTML = '<div class="text-center py-6 text-muted"><p>该分类下没有物品</p></div>';
+    return;
+  }
+
+  // 按分类排序
+  filteredKeys.sort(function(a, b) {
+    const catA = ITEM_DB[a] ? ITEM_DB[a].category : "zzz";
+    const catB = ITEM_DB[b] ? ITEM_DB[b].category : "zzz";
+    if (catA !== catB) return catA.localeCompare(catB);
+    return a.localeCompare(b);
+  });
+
+  let html = "";
+  filteredKeys.forEach(function(key) {
+    const qty = inv[key] || 0;
+    const info = ITEM_DB[key] || { name: key, category: "other" };
+    const catNames = { food: "食物", drink: "水", material: "材料", medical: "医疗", weapon: "武器", armor: "防具", fuel: "燃料", special: "珍品", other: "其他" };
+    const catColors = { food: "badge-orange", drink: "badge-blue", material: "badge-gray", medical: "badge-green", weapon: "badge-red", armor: "badge-purple", fuel: "badge-orange", special: "badge-purple", other: "badge-gray" };
+    html += '<div class="item-row">' +
+      '<div class="flex-1">' +
+        '<div class="flex items-center gap-2">' +
+          '<span class="font-semibold">' + info.name + '</span>' +
+          '<span class="badge ' + (catColors[info.category] || "badge-gray") + '">' + (catNames[info.category] || "其他") + '</span>' +
+        '</div>' +
+        '<div class="text-xs text-muted mt-1">ID: ' + key + '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-1">' +
+        '<button class="btn btn-sm" onclick="changeItemAmount(\'' + key + '\', -1)"' + (qty <= 0 ? ' disabled' : '') + '>-1</button>' +
+        '<input type="number" class="input input-number" value="' + qty + '" min="0" onchange="setItemAmount(\'' + key + '\', this.value)" style="width: 60px;">' +
+        '<button class="btn btn-sm" onclick="changeItemAmount(\'' + key + '\', 1)">+1</button>' +
+        '<button class="btn btn-sm" onclick="changeItemAmount(\'' + key + '\', 10)">+10</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'' + key + '\')" title="删除"><i class="fas fa-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+/**
+ * 筛选背包
+ */
+function filterInventory(category) {
+  inventoryFilter = category;
+  document.querySelectorAll("[data-inv-filter]").forEach(function(btn) {
+    if (btn.dataset.invFilter === category) {
+      btn.classList.add("btn-active");
+    } else {
+      btn.classList.remove("btn-active");
+    }
+  });
+  renderInventory();
+}
+
+/**
+ * 修改物品数量（增减）
+ */
+function changeItemAmount(itemId, delta) {
+  if (!saveData) return;
+  saveData.inventory = saveData.inventory || {};
+  let current = saveData.inventory[itemId] || 0;
+  current += delta;
+  if (current < 0) current = 0;
+  saveData.inventory[itemId] = current;
+  save();
+  renderInventory();
+}
+
+/**
+ * 直接设置物品数量
+ */
+function setItemAmount(itemId, value) {
+  if (!saveData) return;
+  saveData.inventory = saveData.inventory || {};
+  let qty = parseInt(value);
+  if (isNaN(qty) || qty < 0) qty = 0;
+  saveData.inventory[itemId] = qty;
+  save();
+  renderInventory();
+}
+
+/**
+ * 删除物品
+ */
+function deleteItem(itemId) {
+  if (!saveData) return;
+  delete saveData.inventory[itemId];
+  save();
+  renderInventory();
+  showToast("已删除物品", "success");
+}
+
+/**
+ * 添加新物品
+ */
+function addNewItem() {
+  if (!saveData) return;
+  const idInput = document.getElementById("new-item-id");
+  const qtyInput = document.getElementById("new-item-qty");
+  const itemId = (idInput.value || "").trim();
+  const qty = parseInt(qtyInput.value) || 1;
+
+  if (!itemId) {
+    showToast("请输入物品ID", "error");
+    return;
+  }
+  if (!ITEM_DB[itemId]) {
+    showToast("物品ID不存在：" + itemId + "，请从下拉列表中选择", "error");
+    return;
+  }
+
+  saveData.inventory = saveData.inventory || {};
+  saveData.inventory[itemId] = (saveData.inventory[itemId] || 0) + qty;
+  save();
+
+  const info = ITEM_DB[itemId];
+  const name = info ? info.name : itemId;
+  showToast("已添加 " + name + " x" + qty, "success");
+
+  idInput.value = "";
+  qtyInput.value = "1";
+  renderInventory();
+}
+
+// ==================== 装备管理 ====================
+
+/**
+ * 渲染装备
+ */
+function renderEquipment() {
+  if (!saveData) return;
+  const equipped = saveData.equipped || { weapon: null, armor: null };
+
+  // 渲染当前装备
+  const weaponEl = document.getElementById("equip-weapon");
+  const armorEl = document.getElementById("equip-armor");
+
+  weaponEl.innerHTML = renderEquipCard(equipped.weapon, "weapon");
+  armorEl.innerHTML = renderEquipCard(equipped.armor, "armor");
+
+  // 填充下拉选择
+  const weaponSelect = document.getElementById("weapon-select");
+  const armorSelect = document.getElementById("armor-select");
+
+  weaponSelect.innerHTML = '<option value="">-- 卸下武器 --</option>';
+  WEAPON_LIST.forEach(function(id) {
+    const info = ITEM_DB[id] || { name: id };
+    const selected = equipped.weapon === id ? " selected" : "";
+    weaponSelect.innerHTML += '<option value="' + id + '"' + selected + '>' + info.name + ' (' + id + ')</option>';
+  });
+
+  armorSelect.innerHTML = '<option value="">-- 卸下防具 --</option>';
+  ARMOR_LIST.forEach(function(id) {
+    const info = ITEM_DB[id] || { name: id };
+    const selected = equipped.armor === id ? " selected" : "";
+    armorSelect.innerHTML += '<option value="' + id + '"' + selected + '>' + info.name + ' (' + id + ')</option>';
+  });
+}
+
+/**
+ * 渲染装备卡片
+ */
+function renderEquipCard(itemId, type) {
+  if (!itemId) {
+    return '<div class="text-center py-6 text-muted">' +
+      '<i class="fas ' + (type === "weapon" ? "fa-gun-slash" : "fa-shield") + ' text-4xl mb-2"></i>' +
+      '<p>未装备</p></div>';
+  }
+  const info = ITEM_DB[itemId] || { name: itemId };
+  return '<div class="stat-card">' +
+    '<div class="flex items-center gap-3">' +
+      '<div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: var(--bg-input);">' +
+        '<i class="fas ' + (type === "weapon" ? "fa-gun" : "fa-shield-halved") + ' text-xl" style="color: var(--accent-orange);"></i>' +
+      '</div>' +
+      '<div>' +
+        '<div class="font-semibold text-lg">' + info.name + '</div>' +
+        '<div class="text-xs text-muted">ID: ' + itemId + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/**
+ * 更换装备
+ */
+function changeEquipment(type, itemId) {
+  if (!saveData) return;
+  saveData.equipped = saveData.equipped || {};
+  if (!itemId) {
+    saveData.equipped[type] = null;
+  } else {
+    saveData.equipped[type] = itemId;
+  }
+  save();
+  renderEquipment();
+  const info = itemId ? (ITEM_DB[itemId] || { name: itemId }) : null;
+  const typeName = type === "weapon" ? "武器" : "防具";
+  if (info) {
+    showToast(typeName + "已更换为: " + info.name, "success");
+  } else {
+    showToast("已卸下" + typeName, "info");
+  }
+}
+
+// ==================== 设施管理 ====================
+
+/**
+ * 渲染设施
+ */
+function renderShelter() {
+  if (!saveData) return;
+  const shelter = saveData.shelter || {};
+  const allKeys = Object.keys(FACILITY_DB);
+  const builtKeys = allKeys.filter(function(k) {
+    return shelter[k] && typeof shelter[k] === "object" && "level" in shelter[k];
+  });
+  const count = builtKeys.length;
+  const total = allKeys.length;
+
+  const countEl = document.getElementById("shelter-count");
+  if (countEl) countEl.textContent = "已建造 " + count + " / " + total + " 个设施";
+
+  const listEl = document.getElementById("shelter-list");
+  const emptyEl = document.getElementById("shelter-empty");
+
+  if (total === 0) {
+    listEl.innerHTML = "";
+    emptyEl.classList.remove("hidden");
+  } else {
+    emptyEl.classList.add("hidden");
+    let html = "";
+    allKeys.forEach(function(key) {
+      const info = FACILITY_DB[key];
+      const maxLevel = info.maxLevel || 5;
+      const isBuilt = shelter[key] && typeof shelter[key] === "object" && "level" in shelter[key];
+      const level = isBuilt ? (shelter[key].level || 1) : 0;
+      html += '<div class="stat-card"' + (isBuilt ? '' : ' style="opacity:0.65;"') + '>' +
+        '<div class="flex items-center justify-between mb-2">' +
+          '<div class="flex items-center gap-2">' +
+            '<i class="fas ' + info.icon + ' text-xl" style="color: var(--accent-orange);"></i>' +
+            '<div>' +
+              '<div class="font-semibold flex items-center gap-2">' + info.name +
+                (isBuilt
+                  ? '<span class="badge badge-owned"><i class="fas fa-check-circle"></i> 已拥有</span>'
+                  : '<span class="badge badge-unowned"><i class="fas fa-circle-minus"></i> 未拥有</span>') +
+              '</div>' +
+              '<div class="text-xs text-muted">ID: ' + key + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="text-center">' +
+            (isBuilt
+              ? '<div class="stat-value" style="color: var(--accent-orange);">Lv.' + level + '</div><div class="text-xs text-muted">最大 ' + maxLevel + '</div>'
+              : '<div class="text-xs text-muted">—</div>') +
+          '</div>' +
+        '</div>' +
+        (isBuilt
+          ? '<div class="flex items-center gap-1 mt-2">' +
+              '<button class="btn btn-sm" onclick="downgradeFacility(\'' + key + '\')"' + (level <= 1 ? ' disabled' : '') + '><i class="fas fa-minus"></i> 降级</button>' +
+              '<button class="btn btn-sm btn-success" onclick="upgradeFacility(\'' + key + '\')"' + (level >= maxLevel ? ' disabled' : '') + '><i class="fas fa-plus"></i> 升级</button>' +
+              '<button class="btn btn-danger btn-sm ml-auto" onclick="demolishFacility(\'' + key + '\')"><i class="fas fa-trash"></i> 拆除</button>' +
+            '</div>'
+          : '<div class="flex items-center gap-1 mt-2">' +
+              '<button class="btn btn-sm btn-success" onclick="addNewFacility(\'' + key + '\')"><i class="fas fa-hammer"></i> 建造</button>' +
+            '</div>') +
+      '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  // 填充新建设施下拉
+  const selectEl = document.getElementById("new-facility-select");
+  if (selectEl) {
+    selectEl.innerHTML = "";
+    Object.keys(FACILITY_DB).forEach(function(key) {
+      const info = FACILITY_DB[key];
+      const exists = key in shelter;
+      selectEl.innerHTML += '<option value="' + key + '"' + (exists ? ' disabled' : '') + '>' +
+        info.name + (exists ? ' (已建造)' : ' (未拥有)') + '</option>';
+    });
+  }
+}
+
+/**
+ * 升级设施
+ */
+function upgradeFacility(name) {
+  if (!saveData) return;
+  saveData.shelter = saveData.shelter || {};
+  const facility = saveData.shelter[name];
+  if (!facility) return;
+  const info = FACILITY_DB[name] || { maxLevel: 5 };
+  const maxLevel = info.maxLevel || 5;
+  if (facility.level >= maxLevel) {
+    showToast("已达最高等级", "error");
+    return;
+  }
+  facility.level++;
+  save();
+  renderShelter();
+  showToast(FACILITY_DB[name].name + " 已升级至 Lv." + facility.level, "success");
+}
+
+/**
+ * 降级设施
+ */
+function downgradeFacility(name) {
+  if (!saveData) return;
+  saveData.shelter = saveData.shelter || {};
+  const facility = saveData.shelter[name];
+  if (!facility) return;
+  if (facility.level <= 1) {
+    showToast("已是最低等级", "error");
+    return;
+  }
+  facility.level--;
+  save();
+  renderShelter();
+  showToast(FACILITY_DB[name].name + " 已降级至 Lv." + facility.level, "info");
+}
+
+/**
+ * 拆除设施
+ */
+function demolishFacility(name) {
+  if (!saveData) return;
+  const info = FACILITY_DB[name] || { name: name };
+  if (!confirm("确定要拆除 " + info.name + " 吗？此操作不可撤销。")) return;
+  delete saveData.shelter[name];
+  save();
+  renderShelter();
+  showToast(info.name + " 已拆除", "info");
+}
+
+/**
+ * 建造新设施
+ */
+function addNewFacility() {
+  if (!saveData) return;
+  const selectEl = document.getElementById("new-facility-select");
+  const levelInput = document.getElementById("new-facility-level");
+  const facilityKey = selectEl.value;
+  const level = parseInt(levelInput.value) || 1;
+
+  if (!facilityKey) {
+    showToast("请选择设施类型", "error");
+    return;
+  }
+
+  saveData.shelter = saveData.shelter || {};
+  if (saveData.shelter[facilityKey]) {
+    showToast("该设施已存在", "error");
+    return;
+  }
+
+  const info = FACILITY_DB[facilityKey] || { maxLevel: 5 };
+  const maxLevel = info.maxLevel || 5;
+  const finalLevel = Math.min(level, maxLevel);
+
+  saveData.shelter[facilityKey] = { level: finalLevel };
+  save();
+  renderShelter();
+  showToast(info.name + " 已建造 (Lv." + finalLevel + ")", "success");
+}
+
+// ==================== 商店管理 ====================
+
+/**
+ * 渲染商店
+ */
+function renderShop() {
+  if (!saveData) return;
+  const shop = saveData.shop || { stock: {}, lastRestockDay: 0, randomItems: [] };
+  const stock = shop.stock || {};
+  const keys = Object.keys(stock);
+
+  // 补货日
+  const restockInput = document.getElementById("shop-restock-day");
+  if (restockInput) restockInput.value = shop.lastRestockDay || 0;
+
+  // 随机商品数
+  const randomEl = document.getElementById("shop-random-count");
+  if (randomEl) randomEl.textContent = (shop.randomItems || []).length;
+
+  const listEl = document.getElementById("shop-stock-list");
+  const emptyEl = document.getElementById("shop-empty");
+
+  if (keys.length === 0) {
+    listEl.innerHTML = "";
+    emptyEl.classList.remove("hidden");
+    return;
+  }
+  emptyEl.classList.add("hidden");
+
+  let html = "";
+  keys.forEach(function(key) {
+    const qty = stock[key] || 0;
+    const info = ITEM_DB[key] || { name: key, category: "other" };
+    const catNames = { food: "食物", drink: "水", material: "材料", medical: "医疗", weapon: "武器", armor: "防具", fuel: "燃料", special: "珍品", other: "其他" };
+    const catColors = { food: "badge-orange", drink: "badge-blue", material: "badge-gray", medical: "badge-green", weapon: "badge-red", armor: "badge-purple", fuel: "badge-orange", special: "badge-purple", other: "badge-gray" };
+    html += '<div class="item-row">' +
+      '<div class="flex-1">' +
+        '<div class="flex items-center gap-2">' +
+          '<span class="font-semibold">' + info.name + '</span>' +
+          '<span class="badge ' + (catColors[info.category] || "badge-gray") + '">' + (catNames[info.category] || "其他") + '</span>' +
+        '</div>' +
+        '<div class="text-xs text-muted mt-1">ID: ' + key + '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-1">' +
+        '<button class="btn btn-sm" onclick="changeShopStock(\'' + key + '\', -1)">-1</button>' +
+        '<input type="number" class="input input-number" value="' + qty + '" min="0" onchange="setShopStock(\'' + key + '\', this.value)" style="width: 60px;">' +
+        '<button class="btn btn-sm" onclick="changeShopStock(\'' + key + '\', 1)">+1</button>' +
+        '<button class="btn btn-sm" onclick="changeShopStock(\'' + key + '\', 10)">+10</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteShopStock(\'' + key + '\')" title="删除"><i class="fas fa-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+/**
+ * 修改商店库存数量
+ */
+function changeShopStock(itemId, delta) {
+  if (!saveData) return;
+  saveData.shop = saveData.shop || { stock: {} };
+  saveData.shop.stock = saveData.shop.stock || {};
+  let current = saveData.shop.stock[itemId] || 0;
+  current += delta;
+  if (current < 0) current = 0;
+  saveData.shop.stock[itemId] = current;
+  save();
+  renderShop();
+}
+
+/**
+ * 直接设置商店库存数量
+ */
+function setShopStock(itemId, value) {
+  if (!saveData) return;
+  saveData.shop = saveData.shop || { stock: {} };
+  saveData.shop.stock = saveData.shop.stock || {};
+  let qty = parseInt(value);
+  if (isNaN(qty) || qty < 0) qty = 0;
+  saveData.shop.stock[itemId] = qty;
+  save();
+  renderShop();
+}
+
+/**
+ * 删除商店库存商品
+ */
+function deleteShopStock(itemId) {
+  if (!saveData) return;
+  saveData.shop = saveData.shop || { stock: {} };
+  delete saveData.shop.stock[itemId];
+  save();
+  renderShop();
+  showToast("已删除商品", "success");
+}
+
+/**
+ * 设置补货日
+ */
+function setRestockDay(value) {
+  if (!saveData) return;
+  saveData.shop = saveData.shop || {};
+  saveData.shop.lastRestockDay = parseInt(value) || 0;
+  save();
+  showToast("补货日已更新", "success");
+}
+
+/**
+ * 手动补货
+ */
+function restockShop() {
+  if (!saveData) return;
+  saveData.shop = saveData.shop || { stock: {} };
+  saveData.shop.stock = saveData.shop.stock || {};
+  saveData.shop.lastRestockDay = saveData.player.day || 1;
+
+  // 添加补货物品
+  Object.keys(RESTOCK_ITEMS).forEach(function(key) {
+    saveData.shop.stock[key] = (saveData.shop.stock[key] || 0) + RESTOCK_ITEMS[key];
+  });
+
+  save();
+  renderShop();
+  showToast("商店已补货", "success");
+}
+
+/**
+ * 添加商品
+ */
+function addShopItem() {
+  if (!saveData) return;
+  const idInput = document.getElementById("new-shop-item-id");
+  const qtyInput = document.getElementById("new-shop-item-qty");
+  const itemId = (idInput.value || "").trim();
+  const qty = parseInt(qtyInput.value) || 1;
+
+  if (!itemId) {
+    showToast("请输入物品ID", "error");
+    return;
+  }
+  if (!ITEM_DB[itemId]) {
+    showToast("物品ID不存在：" + itemId + "，请从下拉列表中选择", "error");
+    return;
+  }
+
+  saveData.shop = saveData.shop || { stock: {} };
+  saveData.shop.stock = saveData.shop.stock || {};
+  saveData.shop.stock[itemId] = (saveData.shop.stock[itemId] || 0) + qty;
+  save();
+
+  const info = ITEM_DB[itemId];
+  const name = info ? info.name : itemId;
+  showToast("已添加商品 " + name + " x" + qty, "success");
+
+  idInput.value = "";
+  qtyInput.value = "5";
+  renderShop();
+}
+
+// ==================== 状态效果管理 ====================
+
+/**
+ * 渲染状态效果
+ */
+function renderConditions() {
+  if (!saveData) return;
+  const conditions = saveData.player.conditions || {};
+  const keys = Object.keys(conditions);
+  const count = keys.length;
+
+  const countEl = document.getElementById("conditions-count");
+  if (countEl) countEl.textContent = count + " 个状态";
+
+  const listEl = document.getElementById("conditions-list");
+  const emptyEl = document.getElementById("conditions-empty");
+
+  if (count === 0) {
+    listEl.innerHTML = "";
+    emptyEl.classList.remove("hidden");
+  } else {
+    emptyEl.classList.add("hidden");
+    let html = "";
+    keys.forEach(function(key) {
+      const cond = conditions[key];
+      const duration = cond.duration ?? 0;
+      const info = CONDITION_DB[key] || { name: key, icon: "fa-circle-question", color: "gray" };
+      const colorMap = { red: "badge-red", green: "badge-green", yellow: "badge-orange", blue: "badge-blue", purple: "badge-purple", orange: "badge-orange", gray: "badge-gray" };
+      html += '<div class="item-row">' +
+        '<div class="flex-1">' +
+          '<div class="flex items-center gap-2">' +
+            '<i class="fas ' + info.icon + '" style="color: var(--accent-red-light);"></i>' +
+            '<span class="font-semibold">' + info.name + '</span>' +
+            '<span class="badge ' + (colorMap[info.color] || "badge-gray") + '">' + key + '</span>' +
+          '</div>' +
+          '<div class="text-xs text-muted mt-1">持续天数: ' + duration + '</div>' +
+        '</div>' +
+        '<div class="flex items-center gap-1">' +
+          '<button class="btn btn-sm" onclick="changeConditionDuration(\'' + key + '\', -1)">-1天</button>' +
+          '<input type="number" class="input input-number" value="' + duration + '" min="0" onchange="setConditionDuration(\'' + key + '\', this.value)" style="width: 60px;">' +
+          '<button class="btn btn-sm" onclick="changeConditionDuration(\'' + key + '\', 1)">+1天</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="removeCondition(\'' + key + '\')"><i class="fas fa-times"></i> 移除</button>' +
+        '</div>' +
+      '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  // 填充状态下拉
+  const selectEl = document.getElementById("new-condition-select");
+  if (selectEl) {
+    selectEl.innerHTML = "";
+    Object.keys(CONDITION_DB).forEach(function(key) {
+      const info = CONDITION_DB[key];
+      const exists = key in conditions;
+      selectEl.innerHTML += '<option value="' + key + '"' + (exists ? ' disabled' : '') + '>' +
+        info.name + ' (' + key + ')' + (exists ? ' - 已存在' : '') + '</option>';
+    });
+  }
+}
+
+/**
+ * 修改状态持续天数
+ */
+function changeConditionDuration(key, delta) {
+  if (!saveData) return;
+  saveData.player.conditions = saveData.player.conditions || {};
+  const cond = saveData.player.conditions[key];
+  if (!cond) return;
+  let newDuration = (cond.duration || 0) + delta;
+  if (newDuration < 0) newDuration = 0;
+  cond.duration = newDuration;
+  save();
+  renderConditions();
+}
+
+/**
+ * 直接设置状态持续天数
+ */
+function setConditionDuration(key, value) {
+  if (!saveData) return;
+  saveData.player.conditions = saveData.player.conditions || {};
+  const cond = saveData.player.conditions[key];
+  if (!cond) return;
+  let duration = parseInt(value);
+  if (isNaN(duration) || duration < 0) duration = 0;
+  cond.duration = duration;
+  save();
+  renderConditions();
+}
+
+/**
+ * 添加状态效果
+ */
+function addCondition() {
+  if (!saveData) return;
+  const selectEl = document.getElementById("new-condition-select");
+  const durationInput = document.getElementById("new-condition-duration");
+  const key = selectEl.value;
+  const duration = parseInt(durationInput.value) || 1;
+
+  if (!key) {
+    showToast("请选择状态类型", "error");
+    return;
+  }
+
+  saveData.player.conditions = saveData.player.conditions || {};
+  saveData.player.conditions[key] = { duration: duration };
+  save();
+
+  const info = CONDITION_DB[key] || { name: key };
+  showToast("已添加状态: " + info.name, "success");
+
+  durationInput.value = "1";
+  renderConditions();
+}
+
+/**
+ * 移除状态效果
+ */
+function removeCondition(key) {
+  if (!saveData) return;
+  delete saveData.player.conditions[key];
+  save();
+  renderConditions();
+  const info = CONDITION_DB[key] || { name: key };
+  showToast("已移除状态: " + info.name, "info");
+}
+
+// ==================== 旗帜管理 ====================
+
+/**
+ * 渲染旗帜
+ */
+function renderFlags() {
+  if (!saveData) return;
+  const flags = saveData.player.flags || {};
+  const keys = Object.keys(flags);
+  const count = keys.length;
+
+  const countEl = document.getElementById("flags-count");
+  if (countEl) countEl.textContent = count + " 个旗帜";
+
+  const listEl = document.getElementById("flags-list");
+  const emptyEl = document.getElementById("flags-empty");
+
+  if (count === 0) {
+    listEl.innerHTML = "";
+    emptyEl.classList.remove("hidden");
+    return;
+  }
+  emptyEl.classList.add("hidden");
+
+  let html = "";
+  keys.forEach(function(key) {
+    const value = flags[key];
+    const isTrue = value === true || value === "true";
+    html += '<div class="item-row">' +
+      '<div class="flex-1">' +
+        '<div class="flex items-center gap-2">' +
+          '<i class="fas fa-flag" style="color: ' + (isTrue ? "var(--accent-green)" : "var(--text-muted)") + ';"></i>' +
+          '<span class="font-semibold">' + key + '</span>' +
+          '<span class="badge ' + (isTrue ? "badge-green" : "badge-gray") + '">' + (isTrue ? "true" : "false") + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-1">' +
+        '<button class="btn btn-sm ' + (isTrue ? "" : "btn-success") + '" onclick="toggleFlag(\'' + key + '\')">' +
+          '<i class="fas fa-toggle-' + (isTrue ? "on" : "off") + '"></i> 切换' +
+        '</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteFlag(\'' + key + '\')"><i class="fas fa-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+/**
+ * 切换旗帜值
+ */
+function toggleFlag(key) {
+  if (!saveData) return;
+  saveData.player.flags = saveData.player.flags || {};
+  const current = saveData.player.flags[key];
+  saveData.player.flags[key] = !(current === true || current === "true");
+  save();
+  renderFlags();
+  showToast(key + " 已切换为 " + saveData.player.flags[key], "info");
+}
+
+/**
+ * 添加旗帜
+ */
+function addFlag() {
+  if (!saveData) return;
+  const keyInput = document.getElementById("new-flag-key");
+  const valueSelect = document.getElementById("new-flag-value");
+  const key = (keyInput.value || "").trim();
+  const value = valueSelect.value === "true";
+
+  if (!key) {
+    showToast("请输入旗帜名称", "error");
+    return;
+  }
+
+  saveData.player.flags = saveData.player.flags || {};
+  saveData.player.flags[key] = value;
+  save();
+
+  showToast("已添加旗帜: " + key + " = " + value, "success");
+
+  keyInput.value = "";
+  renderFlags();
+}
+
+/**
+ * 删除旗帜
+ */
+function deleteFlag(key) {
+  if (!saveData) return;
+  delete saveData.player.flags[key];
+  save();
+  renderFlags();
+  showToast("已删除旗帜: " + key, "info");
+}
+
+// ==================== 快捷操作 ====================
+
+/**
+ * 一键满血满状态
+ */
+function quickFullHeal() {
+  if (!saveData) return;
+  const p = saveData.player;
+  p.hp = p.maxHp || 100;
+  p.hunger = 100;
+  p.thirst = 100;
+  p.fatigue = 0;
+  p.morale = 100;
+  p.radiation = 0;
+  p.conditions = {};
+  save();
+  renderAll();
+  showToast("已恢复满血满状态", "success");
+}
+
+/**
+ * 一键添加瓶盖 +1000
+ */
+function quickAddCaps() {
+  if (!saveData) return;
+  saveData.player.caps = (saveData.player.caps || 0) + 1000;
+  save();
+  renderPlayer();
+  showToast("已添加 1000 瓶盖（当前: " + saveData.player.caps + "）", "success");
+}
+
+/**
+ * 一键添加所有材料
+ */
+function quickAddMaterials() {
+  if (!saveData) return;
+  saveData.inventory = saveData.inventory || {};
+  Object.keys(ALL_MATERIALS).forEach(function(key) {
+    saveData.inventory[key] = (saveData.inventory[key] || 0) + ALL_MATERIALS[key];
+  });
+  save();
+  renderInventory();
+  showToast("已添加所有材料", "success");
+}
+
+/**
+ * 补充食物和水
+ */
+function quickAddFood() {
+  if (!saveData) return;
+  saveData.inventory = saveData.inventory || {};
+  saveData.inventory.canned_food = (saveData.inventory.canned_food || 0) + 20;
+  saveData.inventory.clean_water = (saveData.inventory.clean_water || 0) + 20;
+  saveData.inventory.dried_meat = (saveData.inventory.dried_meat || 0) + 10;
+  saveData.inventory.bandage = (saveData.inventory.bandage || 0) + 10;
+  save();
+  renderInventory();
+  showToast("已补充食物和水", "success");
+}
+
+/**
+ * 确认重置存档
+ */
+function confirmReset() {
+  showConfirmModal(
+    "重置游戏存档",
+    "此操作将删除当前存档并创建一个新的默认存档，所有游戏进度将丢失！确定要继续吗？",
+    function() {
+      localStorage.removeItem(SAVE_KEY);
+      createNewSave();
+      showToast("存档已重置", "success");
+    }
+  );
+}
+
+/**
+ * 导出存档JSON
+ */
+function exportSave() {
+  if (!saveData) {
+    showToast("没有存档可导出", "error");
+    return;
+  }
+  const json = JSON.stringify(saveData, null, 2);
+  showExportModal(json);
+}
+
+// ==================== 模态框 ====================
+
+/**
+ * 显示确认模态框
+ */
+function showConfirmModal(title, message, onConfirm) {
+  const container = document.getElementById("modal-container");
+  container.innerHTML = '<div class="modal-overlay" id="confirm-modal">' +
+    '<div class="modal-content" style="max-width: 450px;">' +
+      '<h3 class="font-serif-cn text-xl mb-3" style="color: var(--accent-orange);">' +
+        '<i class="fas fa-exclamation-triangle"></i> ' + title +
+      '</h3>' +
+      '<p class="text-secondary mb-6">' + message + '</p>' +
+      '<div class="flex gap-3 justify-end">' +
+        '<button class="btn" onclick="closeModal()">取消</button>' +
+        '<button class="btn btn-danger" id="confirm-btn">确认</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  document.getElementById("confirm-btn").addEventListener("click", function() {
+    closeModal();
+    if (onConfirm) onConfirm();
+  });
+}
+
+/**
+ * 显示导出模态框
+ */
+function showExportModal(json) {
+  const container = document.getElementById("modal-container");
+  container.innerHTML = '<div class="modal-overlay" id="export-modal">' +
+    '<div class="modal-content">' +
+      '<div class="flex items-center justify-between mb-4">' +
+        '<h3 class="font-serif-cn text-xl" style="color: var(--accent-orange);">' +
+          '<i class="fas fa-file-export"></i> 导出存档JSON' +
+        '</h3>' +
+        '<button class="btn btn-sm" onclick="closeModal()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<textarea class="input w-full" style="height: 400px; font-family: monospace; font-size: 0.8rem; resize: vertical;" readonly>' +
+        json +
+      '</textarea>' +
+      '<div class="flex gap-3 mt-4 justify-end">' +
+        '<button class="btn" onclick="copyExportJson()"><i class="fas fa-copy"></i> 复制到剪贴板</button>' +
+        '<button class="btn btn-primary" onclick="downloadExportJson()"><i class="fas fa-download"></i> 下载文件</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/**
+ * 关闭模态框
+ */
+function closeModal() {
+  const container = document.getElementById("modal-container");
+  container.innerHTML = "";
+}
+
+/**
+ * 复制导出的JSON
+ */
+function copyExportJson() {
+  const textarea = document.querySelector("#export-modal textarea");
+  if (!textarea) return;
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    showToast("已复制到剪贴板", "success");
+  } catch (e) {
+    showToast("复制失败，请手动选择复制", "error");
+  }
+}
+
+/**
+ * 下载导出的JSON文件
+ */
+function downloadExportJson() {
+  if (!saveData) return;
+  const json = JSON.stringify(saveData, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "wasteland_save_" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("文件已下载", "success");
+}
+
+// ==================== 辅助功能 ====================
+
+/**
+ * 更新底部信息
+ */
+function updateFooter() {
+  if (!saveData) return;
+  const versionEl = document.getElementById("footer-version");
+  if (versionEl) versionEl.textContent = saveData.version || 3;
+
+  const saveTimeEl = document.getElementById("footer-savetime");
+  if (saveTimeEl && saveData.meta && saveData.meta.saveTime) {
+    saveTimeEl.textContent = new Date(saveData.meta.saveTime).toLocaleString("zh-CN");
+  }
+}
+
+/**
+ * 填充物品datalist
+ */
+function fillItemDatalist() {
+  const datalist = document.getElementById("item-list");
+  if (!datalist) return;
+  let html = "";
+  Object.keys(ITEM_DB).forEach(function(key) {
+    html += '<option value="' + key + '">' + ITEM_DB[key].name + '</option>';
+  });
+  datalist.innerHTML = html;
+}
+
+// ==================== 初始化 ====================
+
+/**
+ * 初始化页面
+ */
+function initPage() {
+  if (!loadSave()) {
+    // 显示无存档提示
+    document.getElementById("no-save-overlay").classList.remove("hidden");
+    document.getElementById("main-container").classList.add("hidden");
+    return;
+  }
+
+  // 隐藏无存档提示，显示主界面
+  document.getElementById("no-save-overlay").classList.add("hidden");
+  document.getElementById("main-container").classList.remove("hidden");
+
+  // 填充datalist
+  fillItemDatalist();
+
+  // 渲染所有内容
+  renderAll();
+
+  // 更新保存状态
+  updateSaveStatus();
+}
+
+// 页面加载完成后初始化
+document.addEventListener("DOMContentLoaded", initPage);
+</script>
+
+</body>
+</html>
